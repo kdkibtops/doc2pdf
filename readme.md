@@ -27,17 +27,48 @@ The application ensures all Microsoft Word instances are terminated before the c
 
 ## Installation
 
-1. Clone the repository: git clone https://github.com/kdkibtops/docs2pdf.git
+### Globally:
 
-2. Navigate to the project directory: cd docs2pdf
+- Install globally if you plan to use it directly from Command line:
 
-3. Install the dependencies: npm install
+```sh
+npm install -g convertfolderdocs2pdf
+```
+
+### Locally:
+
+- Install locally to a project to use it within your project:
+
+```sh
+npm install convertfolderdocs2pdf
+```
 
 ## Usage
 
-1. Build the project: `sh npm run build `
+### Usage from command-line:
 
-2. Run the project: `sh node build/index.js --input "path/to/input/folder" --output "path/to/output/folder" --log-level debug`
+- From command line run:
+
+```sh
+node build/index.js --input "path/to/input/folder" --output "path/to/output/folder" --log-level debug
+```
+
+###
+
+```ts
+import convert2PDF from 'convertfolderdocs2pdf';
+
+async () => {
+	const result = await convert2PDF(
+		false,
+		true,
+		'path-to-input-folder',
+		'path-to-output-folder',
+		'<log-level> (default "info")',
+		'path-to-log-file(default"Output folder")'
+	);
+};
+```
 
 ## Command-line options:
 

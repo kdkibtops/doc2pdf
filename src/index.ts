@@ -22,10 +22,24 @@ async function askForConfirmation(question: string): Promise<boolean> {
 	return confirm;
 }
 
+export type ConversionResult =
+	| {
+			successful: false;
+			message: string;
+	  }
+	| {
+			successful: true;
+			outputDirectory: string;
+	  };
+
 async function convert2PDF(
-	prompt: boolean = true,
-	logToConsole: boolean = true
-): Promise<string> {
+	prompt: boolean = false,
+	logToConsole: boolean = false,
+	inputFolder?: string,
+	outputFolder?: string,
+	logLevel: LogLevels = 'info',
+	logFile?: string
+): Promise<ConversionResult> {
 	const options: Intl.DateTimeFormatOptions = {
 		timeZone: 'Africa/Cairo',
 		year: 'numeric',
@@ -43,7 +57,11 @@ async function convert2PDF(
 			`This process will terminate all opened Microsoft word instances, save your work before proceeding or terminate this.
 Do you want to continue and terminate all running word processes? (Y) or terminate (press any key)`
 		);
-		if (!answer) return 'Operation cancelled by user';
+		if (!answer)
+			return {
+				successful: false,
+				message: 'Operation cancelled by user',
+			};
 	}
 
 	const argv = await yargs(process.argv.slice(2))
@@ -74,13 +92,19 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 		})
 		.help().argv;
 
-	const inputFolder = path.resolve(argv.input);
-	const outputFolder = path.resolve(argv.output);
-	const logLevel = argv['log-level'] as LogLevels;
-	const logFile = path.resolve(
-		argv['log-file'] ? argv['log-file'] : path.resolve(outputFolder),
-		`conversionlog.${new Date().toISOString().replace(/:/g, '_')}.log`
-	);
+	inputFolder = inputFolder
+		? path.resolve(inputFolder)
+		: path.resolve(argv.input);
+	outputFolder = outputFolder
+		? path.resolve(outputFolder)
+		: path.resolve(argv.output);
+	logLevel = logLevel || (argv['log-level'] as LogLevels);
+	logFile = logFile
+		? path.resolve(logFile)
+		: path.resolve(
+				argv['log-file'] ? argv['log-file'] : path.resolve(outputFolder),
+				`conversionlog.${new Date().toISOString().replace(/:/g, '_')}.log`
+		  );
 
 	const logger = new ConsoleColorLogger(logLevel, logFile);
 
@@ -123,14 +147,21 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 					)} Seconds`,
 				]);
 			}
-			return outputFolder; // Return output folder on success
+			return { successful: true, outputDirectory: outputFolder }; // Return output folder on success
 		} catch (err) {
 			const error = err as Error;
 			logger.log('red', ['Error during conversion:', error.message]);
-			return `Error during conversion: ${error.message}`; // Return error message on failure
+			return {
+				successful: false,
+				message: `Error during conversion: ${error.message}`,
+			}; // Return error message on failure
 		}
 	} else {
-		return 'Please provide an input folder path as a command-line argument.';
+		return {
+			successful: false,
+			message:
+				'Please provide an input folder path as a command-line argument.',
+		};
 	}
 }
 
@@ -140,13 +171,13 @@ export default convert2PDF;
 // Check if the script is being run directly or imported as a module
 if (require.main === module) {
 	convert2PDF(true, true).then((result) => {
-		console.log(result);
-		if (
-			result === 'Operation cancelled by user' ||
-			result.startsWith('Error')
-		) {
+		console.log(result.successful ? '' : ``);
+		if (result.successful) {
+			console.log('\x1b[32m%s\x1b[0m', 'Process completed successfully');
 			process.exit(1); // Exit with error code
 		} else {
+			console.log('\x1b[31m%s\x1b[0m', 'Process failed');
+
 			process.exit(0); // Exit with success code
 		}
 	});

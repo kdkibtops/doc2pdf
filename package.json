@@ -5,8 +5,8 @@
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "npx tsc",
+		"test": "npm run build && mocha 'build/tests/**/*.test.js' --timeout 10000",
 		"start": "tsc-watch -p ./tsconfig.json --onSuccess \"node ./build/index.js\""
 	},
 	"keywords": [
@@ -22,7 +22,6 @@
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
-		"@types/node": "^22.10.2",
 		"@types/yargs": "^17.0.33",
 		"tsc-watch": "^6.2.1",
 		"typescript": "^5.7.2"
