@@ -25,6 +25,7 @@ This package tested only on Windows OS, not yet tested on Linux or MacOS
 2. npm (Node Package Manager)
 
 3. Microsoft Word (for the VBScript to interact with)
+
 4. Windows OS (Not tested on Linux or MacOS)
 
 ## Installation
@@ -43,6 +44,14 @@ npm install -g convertfolderdocs2pdf
 
 ```sh
 npm install convertfolderdocs2pdf
+```
+
+### Executable
+
+- Download convert-doc-to-pdf.exe and assets folder or clone the project and run from its root directory
+
+```sh
+convert-doc-to-pdf --input "path/to/input/folder" --output "path/to/output/folder" --log-level debug
 ```
 
 ## Usage

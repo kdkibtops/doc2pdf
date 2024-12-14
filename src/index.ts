@@ -1,10 +1,11 @@
 import yargs from 'yargs';
-import ConsoleColorLogger, { LogLevels } from './ConsoleColorLogger';
+import ConsoleColorLogger from './ConsoleColorLogger';
 import convertAllDocsInFolder from './convertDocToPdf';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import readline from 'readline';
 import path from 'path';
+import { ConversionResult, LogLevels } from './Types';
 
 async function askForConfirmation(question: string): Promise<boolean> {
 	const rl = readline.createInterface({
@@ -21,16 +22,6 @@ async function askForConfirmation(question: string): Promise<boolean> {
 	});
 	return confirm;
 }
-
-export type ConversionResult =
-	| {
-			successful: false;
-			message: string;
-	  }
-	| {
-			successful: true;
-			outputDirectory: string;
-	  };
 
 async function convert2PDF(
 	prompt: boolean = false,
@@ -120,7 +111,7 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 		]);
 	}
 
-	const startProcess = performance.now();
+	const startProcess = process.hrtime();
 
 	if (inputFolder) {
 		try {
@@ -134,17 +125,16 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 
 			if (logToConsole) {
 				logger.log('green', ['All documents have been converted to PDF.']);
-				const endProcess = performance.now();
+				const endProcess = process.hrtime(startProcess);
+				const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
 				logger.log('yellow', [
 					`Process ended at: ${new Date().toLocaleDateString(
 						'en-EG',
 						options
-					)}@${new Date().toLocaleTimeString('en-EG', options)}`,
+					)}`,
 				]);
 				logger.log('cyan', [
-					`Process finished, whole process took ${Math.round(
-						(endProcess - startProcess) / 1000
-					)} Seconds`,
+					`Process finished, whole process took ${timeTaken} Seconds`,
 				]);
 			}
 			return { successful: true, outputDirectory: outputFolder }; // Return output folder on success

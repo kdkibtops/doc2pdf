@@ -1,7 +1,6 @@
 import { appendFileSync, existsSync, mkdirSync } from 'fs';
 import path from 'path';
-
-export type LogLevels = 'info' | 'debug' | 'warn';
+import { LogLevels } from './Types';
 
 class ConsoleColorLogger {
 	private colors: { [key: string]: string } = {
@@ -17,7 +16,7 @@ class ConsoleColorLogger {
 	private logLevel: string;
 	private logFile?: string;
 
-	constructor(logLevel: 'info' | 'debug' | 'warn' = 'info', logFile?: string) {
+	constructor(logLevel: LogLevels = 'info', logFile?: string) {
 		this.logLevel = logLevel;
 		this.logFile = logFile;
 
@@ -34,7 +33,7 @@ class ConsoleColorLogger {
 			timeZone: 'Africa/Cairo',
 		});
 		const formattedMessage = processTime
-			? `${timestamp} - ${message} => ${Math.round(processTime / 1000)} seconds`
+			? `${timestamp} - ${message} => ${Math.round(processTime)} seconds`
 			: `${timestamp} - ${message}`;
 
 		if (this.colors[color]) {

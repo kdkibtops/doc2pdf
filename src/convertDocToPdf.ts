@@ -4,32 +4,40 @@ import { promisify } from 'util';
 import fs, { existsSync, mkdirSync } from 'fs';
 import ConsoleColorLogger from './ConsoleColorLogger';
 const execPromise = promisify(exec);
+
 async function convertDocxToPdf(
 	docxPath: string,
 	pdfPath: string,
 	logger: ConsoleColorLogger
 ): Promise<'Failed' | 'Successful'> {
-	const scriptPath = path.join(__dirname, '../', 'script.vbs');
-	const command = `cscript //Nologo ${scriptPath} "${path.join(
-		docxPath
-	)}" "${path.join(pdfPath)}"`;
+	// Determine the correct path for script.vbs
+	const scriptPath = path.join(__dirname, '../', 'assets', 'script.vbs');
+
+	// For `pkg` environment, resolve path correctly
+	const resolvedScriptPath = process.pkg
+		? path.join(path.dirname(process.execPath), 'assets', 'script.vbs')
+		: scriptPath;
+
+	const command = `cscript //Nologo "${resolvedScriptPath}" "${docxPath}" "${pdfPath}"`;
 	let state: 'Successful' | 'Failed' = 'Failed';
-	const start = performance.now();
+	const startProcess = process.hrtime();
+
 	try {
 		await execPromise(command);
+		const endProcess = process.hrtime(startProcess);
+		const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
 		logger.log(
 			'green',
 			[`PDF created successfully from ${docxPath} to ${pdfPath}`],
-			performance.now() - start
+			timeTaken
 		);
 		state = 'Successful';
 	} catch (error) {
 		state = 'Failed';
-		logger.log(
-			'red',
-			[`Creating PDF failed from: ${docxPath}`],
-			performance.now() - start
-		);
+		const endProcess = process.hrtime(startProcess);
+		const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
+		console.log(error);
+		logger.log('red', [`Creating PDF failed from: ${docxPath}`], timeTaken);
 	} finally {
 		await execPromise(`TASKKILL /im winword.exe /f`)
 			.then(() => true)
@@ -46,7 +54,6 @@ async function convertAllDocsInFolder(
 	outputFolder?: string
 ) {
 	const allowedFileExtensionsToConvert = ['.docx', '.doc'];
-
 	const contents = fs.readdirSync(path.join(inputFolder));
 
 	for (const child of contents) {
@@ -67,6 +74,7 @@ async function convertAllDocsInFolder(
 			]);
 			continue;
 		}
+
 		// Skip temporary Word files
 		if (
 			child.startsWith('~$') ||
@@ -74,6 +82,7 @@ async function convertAllDocsInFolder(
 		) {
 			continue;
 		}
+
 		const pdfPath = path.join(
 			outputFolder ? outputFolder : inputFolder,
 			path.basename(child) + '.pdf'

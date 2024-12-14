@@ -1,6 +1,6 @@
 {
-	"name": "convertfolderdocs2pdf",
-	"version": "1.0.3",
+	"name": "convert-doc-to-pdf",
+	"version": "1.0.0",
 	"description": "Converts all .doc & .docx files in a specified folder and its subdirectories to pdf",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
@@ -33,26 +33,25 @@
 		"tsc-watch": "^6.2.1",
 		"typescript": "^5.7.2"
 	},
-	"bin": {
-		"convertfolderdocs2pdf": "build/index.js"
-	},
+	"bin": "build/index.js",
 	"files": [
 		"dist",
-		"script.vbs",
+		"assets/script.vbs",
 		"README.md"
 	],
 	"pkg": {
 		"targets": [
-			"node14-linux-x64",
-			"node14-macos-x64",
 			"node14-win-x64"
 		],
-		"outputPath": "package",
+		"outputPath": "./",
 		"assets": [
-			"script.vbs"
+			"assets/script.vbs"
 		],
-		"scripts": [
-			"build/index.js"
+		"scripts": "build/**/*.js",
+		"files": [
+			"dist",
+			"assets/script.vbs",
+			"README.md"
 		]
 	}
 }
