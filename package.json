@@ -1,6 +1,6 @@
 {
 	"name": "convertfolderdocs2pdf",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"description": "Converts all .doc & .docx files in a specified folder and its subdirectories to pdf",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
@@ -13,7 +13,10 @@
 		"pdf",
 		"doc",
 		"docx",
-		"convert"
+		"convert",
+		"coverter",
+		"microsoft",
+		"word"
 	],
 	"author": "Mustafa Heidar",
 	"license": "ISC",
@@ -29,6 +32,11 @@
 	"bin": {
 		"convertfolderdocs2pdf": "build/index.js"
 	},
+	"files": [
+		"dist",
+		"script.vbs",
+		"README.md"
+	],
 	"pkg": {
 		"targets": [
 			"node14-linux-x64",
@@ -37,7 +45,7 @@
 		],
 		"outputPath": "package",
 		"assets": [
-			"src/script.vbs"
+			"script.vbs"
 		],
 		"scripts": [
 			"build/index.js"
