@@ -171,13 +171,11 @@ export default convert2PDF;
 // Check if the script is being run directly or imported as a module
 if (require.main === module) {
 	convert2PDF(true, true).then((result) => {
-		console.log(result.successful ? '' : ``);
 		if (result.successful) {
 			console.log('\x1b[32m%s\x1b[0m', 'Process completed successfully');
 			process.exit(1); // Exit with error code
 		} else {
 			console.log('\x1b[31m%s\x1b[0m', 'Process failed');
-
 			process.exit(0); // Exit with success code
 		}
 	});
