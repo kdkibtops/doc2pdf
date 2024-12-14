@@ -4,6 +4,10 @@
 	"description": "Converts all .doc & .docx files in a specified folder and its subdirectories to pdf",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/kdkibtops/doc2pdf.git"
+	},
 	"scripts": {
 		"build": "npx tsc",
 		"test": "npm run build && mocha 'build/tests/**/*.test.js' --timeout 10000",
