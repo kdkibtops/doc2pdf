@@ -87,7 +87,7 @@ async function convertAllDocsInFolder(
 			outputFolder ? outputFolder : inputFolder,
 			path.basename(child) + '.pdf'
 		);
-		if (!existsSync(path.dirname(pdfPath))) mkdirSync(path.dirname(pdfPath));
+		if (!existsSync(path.dirname(pdfPath))) mkdirSync(path.dirname(pdfPath), {recursive: true });
 		const state = await convertDocxToPdf(childPath, pdfPath, logger);
 		converted.set(child, { documentPath: childPath, pdfPath, state });
 	}
