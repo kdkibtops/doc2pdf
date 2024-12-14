@@ -1,0 +1,44 @@
+{
+	"name": "convertfolderdocs2pdf",
+	"version": "1.0.0",
+	"description": "Converts all .doc & .docx files in a specified folder and its subdirectories to pdf",
+	"main": "./dist/index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "npx tsc",
+		"start": "tsc-watch -p ./tsconfig.json --onSuccess \"node ./dist/index.js\" "
+	},
+	"keywords": [
+		"pdf",
+		"doc",
+		"docx",
+		"convert"
+	],
+	"author": "Mustafa Heidar",
+	"license": "ISC",
+	"dependencies": {
+		"idna-uts46-hx": "^3.2.0",
+		"yargs": "^17.7.2"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.2",
+		"@types/yargs": "^17.0.33",
+		"tsc-watch": "^6.2.1",
+		"typescript": "^5.7.2"
+	},
+	"bin": "./dsit/index.js",
+	"pkg": {
+		"targets": [
+			"node14-linux-x64",
+			"node14-macos-x64",
+			"node14-win-x64"
+		],
+		"outputPath": "package",
+		"assets": [
+			"src/script.vbs"
+		],
+		"scripts": [
+			"dist/index.js"
+		]
+	}
+}
