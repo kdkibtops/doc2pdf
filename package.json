@@ -1,6 +1,6 @@
 {
 	"name": "convertfolderdocs2pdf",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Converts all .doc & .docx files in a specified folder and its subdirectories to pdf",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
