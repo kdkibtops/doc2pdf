@@ -11,28 +11,41 @@ async function askForConfirmation(question: string): Promise<boolean> {
 		input: process.stdin,
 		output: process.stdout,
 	});
-	const confirm: boolean = await new Promise(async (resolve) => {
+	const confirm: boolean = await new Promise((resolve) => {
 		console.log('\x1b[31m');
 		rl.question(question, (response) => {
 			console.log('\x1b[0m');
 			rl.close();
-			if (response && response.toLowerCase() === 'y') {
-				resolve(true);
-			} else {
-				resolve(false);
-			}
+			resolve(Boolean(response && response.toLowerCase() === 'y'));
 		});
 	});
 	return confirm;
 }
 
-async function mainFunction() {
-	console.log(`\x1b[32m%s\x1b[0m`, 'Developed by Mustafa Heidar');
-	const answer = await askForConfirmation(
-		`This process will terminate all opened Microsoft word instances, save your work before proceeding or terminate this.
-Do you want to continue and temrinate all running word processes? (Y) or terminate (press anykey)`
-	);
-	if (!answer) return process.exit(0);
+async function convert2PDF(
+	prompt: boolean = true,
+	logToConsole: boolean = true
+): Promise<string> {
+	const options: Intl.DateTimeFormatOptions = {
+		timeZone: 'Africa/Cairo',
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit',
+	};
+
+	console.log(`\x1b[32m%s\x1b[0m`, 'Convert2Pdf Developed by Mustafa Heidar');
+
+	if (prompt) {
+		const answer = await askForConfirmation(
+			`This process will terminate all opened Microsoft word instances, save your work before proceeding or terminate this.
+Do you want to continue and terminate all running word processes? (Y) or terminate (press any key)`
+		);
+		if (!answer) return 'Operation cancelled by user';
+	}
+
 	const argv = await yargs(process.argv.slice(2))
 		.option('input', {
 			alias: 'i',
@@ -49,10 +62,9 @@ Do you want to continue and temrinate all running word processes? (Y) or termina
 		})
 		.option('log-file', {
 			alias: 'lf',
-
 			type: 'string',
 			description:
-				'Log file path (If ommitted, default is ..OutputDirectory/conversionlog.<timestamp>.log',
+				'Log file path (If omitted, default is ..OutputDirectory/conversionlog.<timestamp>.log',
 		})
 		.option('output', {
 			alias: 'o',
@@ -67,66 +79,75 @@ Do you want to continue and temrinate all running word processes? (Y) or termina
 	const logLevel = argv['log-level'] as LogLevels;
 	const logFile = path.resolve(
 		argv['log-file'] ? argv['log-file'] : path.resolve(outputFolder),
-		`conversionlog.${new Date().toISOString().replaceAll(':', '_')}.log`
+		`conversionlog.${new Date().toISOString().replace(/:/g, '_')}.log`
 	);
+
 	const logger = new ConsoleColorLogger(logLevel, logFile);
-	const options: Intl.DateTimeFormatOptions = {
-		timeZone: 'Africa/Cairo',
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit',
-		second: '2-digit',
-	};
-	logger.log('yellow', [
-		`Process starting at: ${new Date().toLocaleDateString(
-			'en-EG',
-			options
-		)}@${new Date().toLocaleTimeString('en-EG', options)}`,
-	]);
-	logger.log(`magenta`, [
-		`Processing ${inputFolder}\nOutput Directory:${outputFolder}\nLog Level: ${logLevel}\nLog directory ${
-			logFile ? logFile : 'console'
-		}`,
-	]);
+
+	if (logToConsole) {
+		logger.log('yellow', [
+			`Process starting at: ${new Date().toLocaleDateString(
+				'en-EG',
+				options
+			)}@${new Date().toLocaleTimeString('en-EG', options)}`,
+		]);
+		logger.log('magenta', [
+			`Processing ${inputFolder}\nOutput Directory:${outputFolder}\nLog Level: ${logLevel}\nLog directory ${logFile}`,
+		]);
+	}
+
 	const startProcess = performance.now();
 
 	if (inputFolder) {
 		try {
-			// Teriminate any previous word process
+			// Terminate any previous word process
 			const execPromise = promisify(exec);
 			await execPromise(`TASKKILL /im winword.exe /f`)
 				.then(() => true)
 				.catch((err) => true);
 
 			await convertAllDocsInFolder(inputFolder, logger, outputFolder);
-			logger.log('green', ['All documents have been converted to PDF.']);
-			const endProcess = performance.now();
-			logger.log('yellow', [
-				`Process ended at: ${new Date().toLocaleDateString(
-					'en-EG',
-					options
-				)}@${new Date().toLocaleTimeString('en-EG', options)}`,
-			]);
 
-			logger.log('cyan', [
-				`Process finished, whole process took ${Math.round(
-					(endProcess - startProcess) / 1000
-				)} Seconds`,
-			]);
-			process.exit(0); // Exit with success code
+			if (logToConsole) {
+				logger.log('green', ['All documents have been converted to PDF.']);
+				const endProcess = performance.now();
+				logger.log('yellow', [
+					`Process ended at: ${new Date().toLocaleDateString(
+						'en-EG',
+						options
+					)}@${new Date().toLocaleTimeString('en-EG', options)}`,
+				]);
+				logger.log('cyan', [
+					`Process finished, whole process took ${Math.round(
+						(endProcess - startProcess) / 1000
+					)} Seconds`,
+				]);
+			}
+			return outputFolder; // Return output folder on success
 		} catch (err) {
 			const error = err as Error;
 			logger.log('red', ['Error during conversion:', error.message]);
-			process.exit(1); // Exit with error code
+			return `Error during conversion: ${error.message}`; // Return error message on failure
 		}
 	} else {
-		console.error(
-			'Please provide an input folder path as a command-line argument.'
-		);
+		return 'Please provide an input folder path as a command-line argument.';
 	}
-	process.exit(1); // Exit with error code if input folder is missing
 }
 
-mainFunction();
+// Export the convert2PDF for use in other apps
+export default convert2PDF;
+
+// Check if the script is being run directly or imported as a module
+if (require.main === module) {
+	convert2PDF(true, true).then((result) => {
+		console.log(result);
+		if (
+			result === 'Operation cancelled by user' ||
+			result.startsWith('Error')
+		) {
+			process.exit(1); // Exit with error code
+		} else {
+			process.exit(0); // Exit with success code
+		}
+	});
+}
