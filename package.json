@@ -1,6 +1,6 @@
 {
 	"name": "convert-doc-to-pdf",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Converts all .doc & .docx files in a specified folder and its subdirectories to pdf",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
@@ -11,7 +11,8 @@
 	"scripts": {
 		"build": "npx tsc",
 		"test": "npm run build && mocha 'build/tests/**/*.test.js' --timeout 10000",
-		"start": "tsc-watch -p ./tsconfig.json --onSuccess \"node ./build/index.js\""
+		"start": "tsc-watch -p ./tsconfig.json --onSuccess \"node ./build/index.js\"",
+		"pack": "npx tsc && pkg package.json"
 	},
 	"keywords": [
 		"pdf",

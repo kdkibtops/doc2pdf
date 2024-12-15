@@ -121,20 +121,29 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 				.then(() => true)
 				.catch((err) => true);
 
-			await convertAllDocsInFolder(inputFolder, logger, outputFolder);
+			const result = await convertAllDocsInFolder(
+				inputFolder,
+				logger,
+				outputFolder
+			);
 
 			if (logToConsole) {
-				logger.log('green', ['All documents have been converted to PDF.']);
+				if (result) {
+					const { directoryCount, falseCount, trueCount, notSupportedCount } =
+						result;
+					logger.log('magenta', [
+						`\nReport:\n- Found ${directoryCount} ${
+							directoryCount === 1 ? 'directory' : 'directories'
+						}\n- Successfully converted: ${trueCount}\n- Failed to convert: ${falseCount}\n- Not Supported files: ${notSupportedCount}`,
+					]);
+				}
 				const endProcess = process.hrtime(startProcess);
 				const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
 				logger.log('yellow', [
 					`Process ended at: ${new Date().toLocaleDateString(
 						'en-EG',
 						options
-					)}`,
-				]);
-				logger.log('cyan', [
-					`Process finished, whole process took ${timeTaken} Seconds`,
+					)}, whole process took ${Math.round(timeTaken)} Seconds`,
 				]);
 			}
 			return { successful: true, outputDirectory: outputFolder }; // Return output folder on success

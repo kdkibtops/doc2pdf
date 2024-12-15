@@ -1,8 +1,8 @@
-# ConvertFolderDocs2PDF
+# convert-doc-to-pdf
 
 ## Description
 
-ConvertFolderDocs2PDF is a Node.js-based application that recursively converts all .doc and .docx files in a specified folder and its subdirectories to PDF.
+convert-doc-to-pdf is a Node.js-based application that recursively converts all .doc and .docx files in a specified folder and its subdirectories to PDF.
 The application ensures all Microsoft Word instances are terminated before the conversion process starts, and provides detailed logging throughout the process.
 This package tested only on Windows OS, not yet tested on Linux or MacOS
 
@@ -35,7 +35,7 @@ This package tested only on Windows OS, not yet tested on Linux or MacOS
 - Install globally if you plan to use it directly from Command line:
 
 ```sh
-npm install -g convertfolderdocs2pdf
+npm install -g convert-doc-to-pdf
 ```
 
 ### Locally:
@@ -43,7 +43,7 @@ npm install -g convertfolderdocs2pdf
 - Install locally to a project to use it within your project:
 
 ```sh
-npm install convertfolderdocs2pdf
+npm install convert-doc-to-pdf
 ```
 
 ### Executable
@@ -67,7 +67,7 @@ node build/index.js --input "path/to/input/folder" --output "path/to/output/fold
 ###
 
 ```ts
-import convert2PDF from 'convertfolderdocs2pdf';
+import convert2PDF from 'convert-doc-to-pdf';
 
 async () => {
 	const result = await convert2PDF(
@@ -99,7 +99,7 @@ node build/index.js --input "C:\path\to\input\folder" --output "C:\path\to\outpu
 
 ## Project Structure
 
-ConvertFolderDocs2PDF/
+convert-doc-to-pdf/
 ├── build/
 │ ├── index.js
 │ ├── convertDocToPdf.js
@@ -127,4 +127,4 @@ Mustafa Heidar
 
 ## Repository
 
-You can find the GitHub repository for this project at: [ConvertFolderDocs2PDF] (https://github.com/kdkibtops/doc2pdf.git)
+You can find the GitHub repository for this project at: [convert-doc-to-pdf] (https://github.com/kdkibtops/doc2pdf.git)
