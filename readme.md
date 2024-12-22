@@ -48,7 +48,13 @@ npm install convert-doc-to-pdf
 
 ### Executable
 
-- Download convert-doc-to-pdf.exe and assets folder or clone the project and run from its root directory
+- You can create executable file (.exe) to use it from any place on your local directory or other devices, in package.json => pkg => targets keep the target OS for your executable file and remove others, then run the following command:
+
+```sh
+npm run pack
+```
+
+- .exe file will be created in the root directory, copy assets folder and exe file (assets must be in the same directory of the exe file) and use this exe anyplace you want from the command line as follow:
 
 ```sh
 convert-doc-to-pdf --input "path/to/input/folder" --output "path/to/output/folder" --log-level debug
