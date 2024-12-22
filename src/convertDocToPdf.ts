@@ -47,14 +47,18 @@ async function convertDocxToPdf(
 
 async function checkFileTypeAndProceed(
 	filePath: string,
-	outputFolder: string,
+	newPDFFilePath: string,
 	logger: ConsoleColorLogger
 ): Promise<boolean | 'Directory' | 'Not Supported' | 'Temp file'> {
 	try {
 		const allowedFileExtensionsToConvert = ['.docx', '.doc'];
 		const isDirectory = statSync(filePath).isDirectory();
 		if (isDirectory) {
-			await convertAllDocsInFolder(filePath, logger, outputFolder);
+			await convertAllDocsInFolder(
+				filePath,
+				logger,
+				path.dirname(newPDFFilePath)
+			);
 			return 'Directory';
 		}
 		if (
@@ -63,7 +67,7 @@ async function checkFileTypeAndProceed(
 			)
 		) {
 			logger.log('yellow', [
-				`File: ${path.basename(filePath)}.${path.extname(
+				`File: ${path.basename(
 					filePath
 				)} is not supported for conversion to pdf`,
 			]);
@@ -76,10 +80,10 @@ async function checkFileTypeAndProceed(
 		) {
 			return 'Temp file';
 		}
-		const pdfPath = outputFolder;
-		if (!existsSync(path.dirname(pdfPath)))
-			mkdirSync(path.dirname(pdfPath), { recursive: true });
-		const state = await convertDocxToPdf(filePath, pdfPath, logger);
+
+		if (!existsSync(path.dirname(newPDFFilePath)))
+			mkdirSync(path.dirname(newPDFFilePath), { recursive: true });
+		const state = await convertDocxToPdf(filePath, newPDFFilePath, logger);
 		return state;
 	} catch (error) {
 		logger.log('red', [error]);
@@ -122,7 +126,7 @@ function countStates(map: Map<number, DocumentKey>) {
 async function convertAllDocsInFolder(
 	inputFolder: string,
 	logger: ConsoleColorLogger,
-	outputFolder?: string
+	outputFolder: string
 ): Promise<{
 	directoryCount: number;
 	notSupportedCount: number;
@@ -134,8 +138,8 @@ async function convertAllDocsInFolder(
 			// Input is path not directory, treat as a file
 			const filePath = inputFolder;
 			const pdfPath = path.join(
-				outputFolder ? outputFolder : inputFolder,
-				path.basename(inputFolder) + '.pdf'
+				outputFolder,
+				path.parse(inputFolder).name.trim() + '.pdf'
 			);
 			const state = await checkFileTypeAndProceed(filePath, pdfPath, logger);
 			converted.set(iterator, { documentPath: filePath, pdfPath, state });
@@ -146,8 +150,8 @@ async function convertAllDocsInFolder(
 			for (const child of contents) {
 				const childPath = path.join(inputFolder, child);
 				const pdfPath = path.join(
-					outputFolder ? outputFolder : inputFolder,
-					path.basename(child) + '.pdf'
+					outputFolder,
+					path.parse(child).name.trim() + '.pdf'
 				);
 
 				const state = await checkFileTypeAndProceed(childPath, pdfPath, logger);

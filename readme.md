@@ -128,3 +128,17 @@ Mustafa Heidar
 ## Repository
 
 You can find the GitHub repository for this project at: [convert-doc-to-pdf] (https://github.com/kdkibtops/doc2pdf.git)
+
+## Changelog
+
+### v1.0.1
+
+- Minor fixes in the code and Readme.MD file.
+
+### v1.0.2
+
+- Updated dependencies to the latest versions.
+- Fixed issues with logging to console and file.
+- Improved error handling during the conversion process.
+- Fixed output directory structure, now all created filed are grouped into one directory without any subdirectories.
+- Fixed issue with created files extension, now original file extension is removed from the file name.

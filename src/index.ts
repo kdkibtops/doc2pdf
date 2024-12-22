@@ -79,7 +79,6 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 			alias: 'o',
 			type: 'string',
 			description: 'Output directory path',
-			default: './exported',
 		})
 		.help().argv;
 
@@ -88,7 +87,10 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 		: path.resolve(argv.input);
 	outputFolder = outputFolder
 		? path.resolve(outputFolder)
-		: path.resolve(argv.output);
+		: argv.output
+		? path.resolve(argv.output)
+		: path.join(path.resolve(inputFolder), 'exported');
+
 	logLevel = logLevel || (argv['log-level'] as LogLevels);
 	logFile = logFile
 		? path.resolve(logFile)
@@ -101,10 +103,7 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 
 	if (logToConsole) {
 		logger.log('yellow', [
-			`Process starting at: ${new Date().toLocaleDateString(
-				'en-EG',
-				options
-			)}@${new Date().toLocaleTimeString('en-EG', options)}`,
+			`Process starting at: ${new Date().toLocaleDateString('en-EG', options)}`,
 		]);
 		logger.log('magenta', [
 			`Processing ${inputFolder}\nOutput Directory:${outputFolder}\nLog Level: ${logLevel}\nLog directory ${logFile}`,
@@ -132,7 +131,7 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 					const { directoryCount, falseCount, trueCount, notSupportedCount } =
 						result;
 					logger.log('magenta', [
-						`\nReport:\n- Found ${directoryCount} ${
+						`Report:\n- Found ${directoryCount} ${
 							directoryCount === 1 ? 'directory' : 'directories'
 						}\n- Successfully converted: ${trueCount}\n- Failed to convert: ${falseCount}\n- Not Supported files: ${notSupportedCount}`,
 					]);

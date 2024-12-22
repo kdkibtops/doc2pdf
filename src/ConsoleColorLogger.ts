@@ -42,7 +42,7 @@ class ConsoleColorLogger {
 				formattedMessage
 			);
 		} else {
-			console.log(formattedMessage); // Default to no color if the color is not found
+			console.log(formattedMessage + '\n'); // Default to no color if the color is not found
 		}
 		if (this.logFile) {
 			switch (this.logLevel) {
@@ -56,7 +56,7 @@ class ConsoleColorLogger {
 				default:
 					break;
 			}
-			appendFileSync(this.logFile, `${formattedMessage}`);
+			appendFileSync(this.logFile, `${formattedMessage}` + '\n');
 		}
 	}
 
