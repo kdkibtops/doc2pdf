@@ -54,7 +54,7 @@ npm install convert-doc-to-pdf
 npm run pack
 ```
 
-- .exe file will be created in the root directory, copy assets folder and exe file (assets must be in the same directory of the exe file) and use this exe anyplace you want from the command line as follow:
+- .exe file will be created in the root directory,use the .exe file any place you want from the command line as follow:
 
 ```sh
 convert-doc-to-pdf --input "path/to/input/folder" --output "path/to/output/folder" --log-level debug
@@ -148,3 +148,7 @@ You can find the GitHub repository for this project at: [convert-doc-to-pdf] (ht
 - Improved error handling during the conversion process.
 - Fixed output directory structure, now all created filed are grouped into one directory without any subdirectories.
 - Fixed issue with created files extension, now original file extension is removed from the file name.
+
+###
+
+- Now, VBS script will be created by the application if not exists, in case the app is running from pkg, the created temp_script.vbs will be removed once finished, however if app is running from node the created script will remain in the assets folder

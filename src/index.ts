@@ -6,6 +6,7 @@ import { exec } from 'child_process';
 import readline from 'readline';
 import path from 'path';
 import { ConversionResult, LogLevels } from './Types';
+import { existsSync, unlinkSync } from 'fs';
 
 async function askForConfirmation(question: string): Promise<boolean> {
 	const rl = readline.createInterface({
@@ -125,6 +126,17 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 				logger,
 				outputFolder
 			);
+			// For `pkg` environment, remove create temp vbs script file
+			if (process.pkg) {
+				const resolvedScriptPath = path.join(
+					path.dirname(process.execPath),
+
+					'~$temp_script.vbs'
+				);
+				if (existsSync(resolvedScriptPath)) {
+					unlinkSync(resolvedScriptPath);
+				}
+			}
 
 			if (logToConsole) {
 				if (result) {

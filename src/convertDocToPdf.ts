@@ -1,7 +1,13 @@
 import { exec } from 'child_process';
 import path from 'path';
 import { promisify } from 'util';
-import { existsSync, mkdirSync, readdirSync, statSync } from 'fs';
+import {
+	existsSync,
+	mkdirSync,
+	readdirSync,
+	statSync,
+	writeFileSync,
+} from 'fs';
 import ConsoleColorLogger from './ConsoleColorLogger';
 const execPromise = promisify(exec);
 
@@ -11,12 +17,46 @@ async function convertDocxToPdf(
 	logger: ConsoleColorLogger
 ): Promise<boolean> {
 	// Determine the correct path for script.vbs
-	const scriptPath = path.join(__dirname, '../', 'assets', 'script.vbs');
+	const scriptPath = path.join(__dirname, '../', 'assets', '~$temp_script.vbs');
 
 	// For `pkg` environment, resolve path correctly
 	const resolvedScriptPath = process.pkg
-		? path.join(path.dirname(process.execPath), 'assets', 'script.vbs')
+		? path.join(path.dirname(process.execPath), '~$temp_script.vbs')
 		: scriptPath;
+	//  Create temp vbs script if not exists
+	if (!existsSync(resolvedScriptPath)) {
+		const vbsScript = `
+Dim args
+Set args = WScript.Arguments
+
+On Error Resume Next
+
+inputFile = args(0)
+outputFile = args(1)
+
+Set objWord = CreateObject("Word.Application")
+Set objDoc = objWord.Documents.Open(inputFile)
+
+If Err.Number <> 0 Then
+    ' Error occurred while opening the file
+    WScript.StdOut.WriteLine "Error opening file: " & Err.Description
+    objWord.Quit
+    WScript.Quit(1)  ' Exit with error code 1
+End If
+
+On Error GoTo 0  ' Reset error handling
+
+objDoc.SaveAs2 outputFile, 17 '17 stands for wdFormatPDF
+objDoc.Close
+objWord.Quit
+
+WScript.StdOut.WriteLine "Conversion successful"
+WScript.Quit(0)  ' Exit with success code
+`;
+		if (!existsSync(path.dirname(resolvedScriptPath)))
+			mkdirSync(path.dirname(resolvedScriptPath));
+		writeFileSync(resolvedScriptPath, vbsScript, 'utf8');
+	}
 
 	const command = `cscript //Nologo "${resolvedScriptPath}" "${docxPath}" "${pdfPath}"`;
 	let state: boolean = false;
