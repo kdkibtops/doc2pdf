@@ -149,6 +149,8 @@ You can find the GitHub repository for this project at: [convert-doc-to-pdf] (ht
 - Fixed output directory structure, now all created filed are grouped into one directory without any subdirectories.
 - Fixed issue with created files extension, now original file extension is removed from the file name.
 
-###
+### v1.0.3 (Still working on it)
 
-- Now, VBS script will be created by the application if not exists, in case the app is running from pkg, the created temp_script.vbs will be removed once finished, however if app is running from node the created script will remain in the assets folder
+[x] Now, VBS script will be created by the application if not exists, in case the app is running from pkg, the created temp_script.vbs will be removed once finished, however if app is running from node the created script will remain in the assets folder.
+[ ] Manage log levels accordingly.
+[ ] Quiet and no logging mode feature.

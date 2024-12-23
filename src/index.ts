@@ -183,10 +183,10 @@ if (require.main === module) {
 	convert2PDF(true, true).then((result) => {
 		if (result.successful) {
 			console.log('\x1b[32m%s\x1b[0m', 'Process completed successfully');
-			process.exit(1); // Exit with error code
+			process.exit(0); // Exit with success code
 		} else {
 			console.log('\x1b[31m%s\x1b[0m', 'Process failed');
-			process.exit(0); // Exit with success code
+			process.exit(1); // Exit with error code
 		}
 	});
 }
