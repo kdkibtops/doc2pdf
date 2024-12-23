@@ -151,6 +151,6 @@ You can find the GitHub repository for this project at: [convert-doc-to-pdf] (ht
 
 ### v1.0.3 (Still working on it)
 
-[x] Now, VBS script will be created by the application if not exists, in case the app is running from pkg, the created temp_script.vbs will be removed once finished, however if app is running from node the created script will remain in the assets folder.
-[ ] Manage log levels accordingly.
-[ ] Quiet and no logging mode feature.
+- [x] Now, VBS script will be created by the application if not exists, in case the app is running from pkg, the created temp_script.vbs will be removed once finished, however if app is running from node the created script will remain in the assets folder.
+- [ ] Manage log levels accordingly.
+- [ ] Quiet and no logging mode feature.
