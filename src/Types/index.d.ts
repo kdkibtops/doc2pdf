@@ -18,6 +18,10 @@ export type ConversionResult =
 	| {
 			successful: true;
 			outputDirectory: string;
+			directoryCount: number;
+			falseCount: number;
+			trueCount: number;
+			notSupportedCount: number;
 	  };
 
 export function convert2PDF(

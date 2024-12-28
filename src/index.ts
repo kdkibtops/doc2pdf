@@ -88,136 +88,253 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 				message: 'Operation cancelled by user',
 			};
 	}
+	if (require.main === module) {
+		const argv = await yargs(process.argv.slice(2))
+			.option('input', {
+				alias: 'i',
+				type: 'string',
+				description: 'Input directory path',
+				demandOption: true,
+			})
+			.option('log-level', {
+				alias: 'll',
+				type: 'string',
+				description: 'Log level',
+				default: 'info',
+				choices: ['info', 'debug', 'warn'],
+			})
+			.option('log-file', {
+				alias: 'lf',
+				type: 'string',
+				description:
+					'Log file path (If omitted, default is ..OutputDirectory/conversionlog.<timestamp>.log',
+			})
+			.option('output', {
+				alias: 'o',
+				type: 'string',
+				description: 'Output directory path',
+			})
+			.help().argv;
 
-	const argv = await yargs(process.argv.slice(2))
-		.option('input', {
-			alias: 'i',
-			type: 'string',
-			description: 'Input directory path',
-			demandOption: true,
-		})
-		.option('log-level', {
-			alias: 'll',
-			type: 'string',
-			description: 'Log level',
-			default: 'info',
-			choices: ['info', 'debug', 'warn'],
-		})
-		.option('log-file', {
-			alias: 'lf',
-			type: 'string',
-			description:
-				'Log file path (If omitted, default is ..OutputDirectory/conversionlog.<timestamp>.log',
-		})
-		.option('output', {
-			alias: 'o',
-			type: 'string',
-			description: 'Output directory path',
-		})
-		.help().argv;
+		inputFolder = inputFolder
+			? path.resolve(inputFolder)
+			: argv.input
+			? path.resolve(argv.input)
+			: process.pkg
+			? path.resolve(
+					(await getParams(`Enter the input folder path:`, false).then(
+						(userResponse) => userResponse
+					)) as string
+			  )
+			: undefined;
 
-	inputFolder = inputFolder
-		? path.resolve(inputFolder)
-		: argv.input
-		? path.resolve(argv.input)
-		: process.pkg
-		? path.resolve(
-				(await getParams(`Enter the input folder path:`, false).then(
-					(userResponse) => userResponse
-				)) as string
-		  )
-		: undefined;
+		if (!existsSync(inputFolder as string)) {
+			console.log('\x1b[31m%s\x1b[0m', 'Input folder does not exist');
+			process.exit(1); // input folder does not exist
+		}
+		outputFolder = outputFolder
+			? path.resolve(outputFolder)
+			: argv.output
+			? path.resolve(argv.output)
+			: path.join(path.resolve(inputFolder as string), 'exported');
 
-	if (!existsSync(inputFolder as string)) {
-		console.log('\x1b[31m%s\x1b[0m', 'Input folder does not exist');
-		process.exit(1); // input folder does not exist
-	}
-	outputFolder = outputFolder
-		? path.resolve(outputFolder)
-		: argv.output
-		? path.resolve(argv.output)
-		: path.join(path.resolve(inputFolder as string), 'exported');
+		logLevel = logLevel || (argv['log-level'] as LogLevels);
+		logFile = logFile
+			? path.resolve(logFile)
+			: path.resolve(
+					argv['log-file'] ? argv['log-file'] : path.resolve(outputFolder),
+					`conversionlog.${new Date().toISOString().replace(/:/g, '_')}.log`
+			  );
 
-	logLevel = logLevel || (argv['log-level'] as LogLevels);
-	logFile = logFile
-		? path.resolve(logFile)
-		: path.resolve(
-				argv['log-file'] ? argv['log-file'] : path.resolve(outputFolder),
-				`conversionlog.${new Date().toISOString().replace(/:/g, '_')}.log`
-		  );
+		const logger = new ConsoleColorLogger(logLevel, logFile);
 
-	const logger = new ConsoleColorLogger(logLevel, logFile);
+		if (logToConsole) {
+			logger.log('yellow', [
+				`Process starting at: ${new Date().toLocaleDateString(
+					'en-EG',
+					options
+				)}`,
+			]);
+			logger.log('magenta', [
+				`Processing ${inputFolder}\nOutput Directory:${outputFolder}\nLog Level: ${logLevel}\nLog directory ${logFile}`,
+			]);
+		}
 
-	if (logToConsole) {
-		logger.log('yellow', [
-			`Process starting at: ${new Date().toLocaleDateString('en-EG', options)}`,
-		]);
-		logger.log('magenta', [
-			`Processing ${inputFolder}\nOutput Directory:${outputFolder}\nLog Level: ${logLevel}\nLog directory ${logFile}`,
-		]);
-	}
+		const startProcess = process.hrtime();
 
-	const startProcess = process.hrtime();
+		if (inputFolder) {
+			try {
+				// Terminate any previous word process
+				const execPromise = promisify(exec);
+				await execPromise(`TASKKILL /im winword.exe /f`)
+					.then(() => true)
+					.catch((err) => true);
 
-	if (inputFolder) {
-		try {
-			// Terminate any previous word process
-			const execPromise = promisify(exec);
-			await execPromise(`TASKKILL /im winword.exe /f`)
-				.then(() => true)
-				.catch((err) => true);
-
-			const result = await convertAllDocsInFolder(
-				inputFolder,
-				logger,
-				outputFolder
-			);
-			// For `pkg` environment, remove create temp vbs script file
-			if (process.pkg) {
-				const resolvedScriptPath = path.join(
-					path.dirname(process.execPath),
-
-					'~$temp_script.vbs'
+				const result = await convertAllDocsInFolder(
+					inputFolder,
+					logger,
+					outputFolder
 				);
-				if (existsSync(resolvedScriptPath)) {
-					unlinkSync(resolvedScriptPath);
-				}
-			}
+				// For `pkg` environment, remove create temp vbs script file
+				if (process.pkg) {
+					const resolvedScriptPath = path.join(
+						path.dirname(process.execPath),
 
-			if (logToConsole) {
+						'~$temp_script.vbs'
+					);
+					if (existsSync(resolvedScriptPath)) {
+						unlinkSync(resolvedScriptPath);
+					}
+				}
+
 				if (result) {
 					const { directoryCount, falseCount, trueCount, notSupportedCount } =
 						result;
-					logger.log('magenta', [
-						`Report:\n- Found ${directoryCount} ${
-							directoryCount === 1 ? 'directory' : 'directories'
-						}\n- Successfully converted: ${trueCount}\n- Failed to convert: ${falseCount}\n- Not Supported files: ${notSupportedCount}`,
-					]);
+					if (logToConsole) {
+						logger.log('magenta', [
+							`Report:\n- Found ${directoryCount} ${
+								directoryCount === 1 ? 'directory' : 'directories'
+							}\n- Successfully converted: ${trueCount}\n- Failed to convert: ${falseCount}\n- Not Supported files: ${notSupportedCount}`,
+						]);
+						const endProcess = process.hrtime(startProcess);
+						const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
+						logger.log('yellow', [
+							`Process ended at: ${new Date().toLocaleDateString(
+								'en-EG',
+								options
+							)}, whole process took ${Math.round(timeTaken)} Seconds`,
+						]);
+					}
+					return {
+						successful: true,
+						outputDirectory: outputFolder,
+						directoryCount,
+						falseCount,
+						trueCount,
+						notSupportedCount,
+					}; // Return output folder on success
+				} else {
+					throw new Error('Error during conversion');
 				}
-				const endProcess = process.hrtime(startProcess);
-				const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
-				logger.log('yellow', [
-					`Process ended at: ${new Date().toLocaleDateString(
-						'en-EG',
-						options
-					)}, whole process took ${Math.round(timeTaken)} Seconds`,
-				]);
+			} catch (err) {
+				const error = err as Error;
+				logger.log('red', ['Error during conversion:', error.message]);
+				return {
+					successful: false,
+					message: `Error during conversion: ${error.message}`,
+				}; // Return error message on failure
 			}
-			return { successful: true, outputDirectory: outputFolder }; // Return output folder on success
-		} catch (err) {
-			const error = err as Error;
-			logger.log('red', ['Error during conversion:', error.message]);
+		} else {
 			return {
 				successful: false,
-				message: `Error during conversion: ${error.message}`,
-			}; // Return error message on failure
+				message:
+					'Please provide an input folder path as a command-line argument.',
+			};
 		}
 	} else {
-		return {
-			successful: false,
-			message:
-				'Please provide an input folder path as a command-line argument.',
-		};
+		inputFolder = inputFolder ? path.resolve(inputFolder) : undefined;
+
+		if (!existsSync(inputFolder as string)) {
+			console.log('\x1b[31m%s\x1b[0m', 'Input folder does not exist');
+			process.exit(1); // input folder does not exist
+		}
+		outputFolder = outputFolder
+			? path.resolve(outputFolder)
+			: path.join(path.resolve(inputFolder as string), 'exported');
+
+		logLevel = logLevel;
+		logFile = logFile
+			? path.resolve(logFile)
+			: path.resolve(
+					path.resolve(outputFolder),
+					`conversionlog.${new Date().toISOString().replace(/:/g, '_')}.log`
+			  );
+
+		const logger = new ConsoleColorLogger(logLevel, logFile);
+
+		if (logToConsole) {
+			logger.log('yellow', [
+				`Process starting at: ${new Date().toLocaleDateString(
+					'en-EG',
+					options
+				)}`,
+			]);
+			logger.log('magenta', [
+				`Processing ${inputFolder}\nOutput Directory:${outputFolder}\nLog Level: ${logLevel}\nLog directory ${logFile}`,
+			]);
+		}
+
+		const startProcess = process.hrtime();
+
+		if (inputFolder) {
+			try {
+				// Terminate any previous word process
+				const execPromise = promisify(exec);
+				await execPromise(`TASKKILL /im winword.exe /f`)
+					.then(() => true)
+					.catch((err) => true);
+
+				const result = await convertAllDocsInFolder(
+					inputFolder,
+					logger,
+					outputFolder
+				);
+				// For `pkg` environment, remove create temp vbs script file
+				if (process.pkg) {
+					const resolvedScriptPath = path.join(
+						path.dirname(process.execPath),
+
+						'~$temp_script.vbs'
+					);
+					if (existsSync(resolvedScriptPath)) {
+						unlinkSync(resolvedScriptPath);
+					}
+				}
+
+				if (result) {
+					const { directoryCount, falseCount, trueCount, notSupportedCount } =
+						result;
+					if (logToConsole) {
+						logger.log('magenta', [
+							`Report:\n- Found ${directoryCount} ${
+								directoryCount === 1 ? 'directory' : 'directories'
+							}\n- Successfully converted: ${trueCount}\n- Failed to convert: ${falseCount}\n- Not Supported files: ${notSupportedCount}`,
+						]);
+						const endProcess = process.hrtime(startProcess);
+						const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
+						logger.log('yellow', [
+							`Process ended at: ${new Date().toLocaleDateString(
+								'en-EG',
+								options
+							)}, whole process took ${Math.round(timeTaken)} Seconds`,
+						]);
+					}
+					return {
+						successful: true,
+						outputDirectory: outputFolder,
+						directoryCount,
+						falseCount,
+						trueCount,
+						notSupportedCount,
+					}; // Return output folder on success
+				} else {
+					throw new Error('Error during conversion');
+				}
+			} catch (err) {
+				const error = err as Error;
+				logger.log('red', ['Error during conversion:', error.message]);
+				return {
+					successful: false,
+					message: `Error during conversion: ${error.message}`,
+				}; // Return error message on failure
+			}
+		} else {
+			return {
+				successful: false,
+				message:
+					'Please provide an input folder path as a command-line argument.',
+			};
+		}
 	}
 }
 
