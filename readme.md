@@ -1,8 +1,8 @@
-# convert-doc-to-pdf
+# doc-to-pdf-converter
 
 ## Description
 
-convert-doc-to-pdf is a Node.js-based application that recursively converts all .doc and .docx files in a specified folder and its subdirectories to PDF.
+doc-to-pdf-converter is a Node.js-based application that recursively converts all .doc and .docx files in a specified folder and its subdirectories to PDF.
 The application ensures all Microsoft Word instances are terminated before the conversion process starts, and provides detailed logging throughout the process.
 This package tested only on Windows OS, not yet tested on Linux or MacOS
 
@@ -35,7 +35,7 @@ This package tested only on Windows OS, not yet tested on Linux or MacOS
 - Install globally if you plan to use it directly from Command line:
 
 ```sh
-npm install -g convert-doc-to-pdf
+npm install -g doc-to-pdf-converter
 ```
 
 ### Locally:
@@ -43,7 +43,7 @@ npm install -g convert-doc-to-pdf
 - Install locally to a project to use it within your project:
 
 ```sh
-npm install convert-doc-to-pdf
+npm i doc-to-pdf-converter
 ```
 
 ### Executable
@@ -57,7 +57,7 @@ npm run pack
 - .exe file will be created in the root directory,use the .exe file any place you want from the command line as follow:
 
 ```sh
-convert-doc-to-pdf --input "path/to/input/folder" --output "path/to/output/folder" --log-level debug
+doc-to-pdf-converter --input "path/to/input/folder" --output "path/to/output/folder" --log-level debug
 ```
 
 ## Usage
@@ -73,7 +73,7 @@ node build/index.js --input "path/to/input/folder" --output "path/to/output/fold
 ###
 
 ```ts
-import convert2PDF from 'convert-doc-to-pdf';
+import convert2PDF from 'doc-to-pdf-converter';
 
 async () => {
 	const result = await convert2PDF(
@@ -105,12 +105,16 @@ node build/index.js --input "C:\path\to\input\folder" --output "C:\path\to\outpu
 
 ## Project Structure
 
-convert-doc-to-pdf/
-├── build/
+doc-to-pdf-converter/
+├── src/
 │ ├── index.js
 │ ├── convertDocToPdf.js
-├── src/
+| |── ConsoleColorLogger.ts
+├── assets/
 │ ├── script.vbs
+|── Types/
+| |── types.d.ts
+| |── global.d.ts
 ├── package.json
 ├── README.md
 ├── tsconfig.json
@@ -133,7 +137,7 @@ Mustafa Heidar
 
 ## Repository
 
-You can find the GitHub repository for this project at: [convert-doc-to-pdf] (https://github.com/kdkibtops/doc2pdf.git)
+You can find the GitHub repository for this project at: [doc-to-pdf-converter] (https://github.com/kdkibtops/doc2pdf.git)
 
 ## Changelog
 
