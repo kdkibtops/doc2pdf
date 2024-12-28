@@ -1,5 +1,11 @@
 // index.d.ts
-export type LogLevels = 'info' | 'debug' | 'warn';
+export type LogLevels =
+	| 'info'
+	| 'debug'
+	| 'warn'
+	| 'quiet'
+	| 'log_to_file'
+	| 'log_to_console';
 
 export interface ConversionOptions {
 	inputFolder?: string;
@@ -23,12 +29,3 @@ export type ConversionResult =
 			trueCount: number;
 			notSupportedCount: number;
 	  };
-
-export function convert2PDF(
-	prompt?: boolean,
-	logToConsole?: boolean,
-	inputFolder?: string,
-	outputFolder?: string,
-	logLevel?: LogLevels,
-	logFile?: string
-): Promise<ConversionResult>;

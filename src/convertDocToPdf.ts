@@ -67,7 +67,7 @@ WScript.Quit(0)  ' Exit with success code
 		const endProcess = process.hrtime(startProcess);
 		const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
 		logger.log(
-			'green',
+			'warn_success',
 			[`PDF created successfully from ${docxPath} to ${pdfPath}`],
 			timeTaken
 		);
@@ -76,8 +76,12 @@ WScript.Quit(0)  ' Exit with success code
 		state = false;
 		const endProcess = process.hrtime(startProcess);
 		const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
-		console.log(error);
-		logger.log('red', [`Creating PDF failed from: ${docxPath}`], timeTaken);
+		logger.log(
+			'warn_failed',
+			[`Creating PDF failed from: ${docxPath}`],
+			timeTaken
+		);
+		logger.log('debug', [error], timeTaken);
 	} finally {
 		await execPromise(`TASKKILL /im winword.exe /f`)
 			.then(() => true)
@@ -107,7 +111,7 @@ async function checkFileTypeAndProceed(
 				path.extname(filePath).toLowerCase()
 			)
 		) {
-			logger.log('yellow', [
+			logger.log('warning', [
 				`File: ${path.basename(
 					filePath
 				)} is not supported for conversion to pdf`,
@@ -127,7 +131,8 @@ async function checkFileTypeAndProceed(
 		const state = await convertDocxToPdf(filePath, newPDFFilePath, logger);
 		return state;
 	} catch (error) {
-		logger.log('red', [error]);
+		logger.log('warn_failed', [error]);
+		logger.log('debug', [error]);
 		return false;
 	}
 }
@@ -202,7 +207,8 @@ async function convertAllDocsInFolder(
 		}
 		return countStates(converted);
 	} catch (error) {
-		logger.log('red', [(error as Error).message]);
+		logger.log('warn_failed', [(error as Error).message]);
+		logger.log('debug', [error]);
 		return null;
 	}
 }

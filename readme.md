@@ -151,6 +151,7 @@ You can find the GitHub repository for this project at: [convert-doc-to-pdf] (ht
 
 ### v1.0.3 (Still working on it)
 
-- <span style="color:green">[x]</span> Now, VBS script will be created by the application if not exists, in case the app is running from pkg, the created temp_script.vbs will be removed once finished, however if app is running from node the created script will remain in the assets folder.
-- <span style="color:yellow">[ ]</span> Manage log levels accordingly.
-- <span style="color:yellow">[ ]</span> Quiet and no logging mode feature.
+- VBS script will be created by the application if not exists, in case the app is running from pkg, the created temp_script.vbs will be removed once finished, however if app is running from node the created script will remain in the assets folder.
+- Managed log levels accordingly.
+- Quiet and no logging mode feature.
+- Fixed types declarations error, currently all types are properly defined

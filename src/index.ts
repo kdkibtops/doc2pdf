@@ -5,8 +5,8 @@ import { promisify } from 'util';
 import { exec } from 'child_process';
 import readline from 'readline';
 import path from 'path';
-import { ConversionResult, LogLevels } from './Types';
 import { existsSync, unlinkSync } from 'fs';
+import { ConversionResult, LogLevels } from '../Types/types';
 
 async function askForConfirmation(question: string): Promise<boolean> {
 	const rl = readline.createInterface({
@@ -74,8 +74,8 @@ async function convert2PDF(
 		minute: '2-digit',
 		second: '2-digit',
 	};
-
-	console.log(`\x1b[32m%s\x1b[0m`, 'Convert2Pdf Developed by Mustafa Heidar');
+	if (logToConsole)
+		console.log(`\x1b[32m%s\x1b[0m`, 'Convert2Pdf Developed by Mustafa Heidar');
 
 	if (prompt) {
 		const answer = await askForConfirmation(
@@ -101,7 +101,14 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 				type: 'string',
 				description: 'Log level',
 				default: 'info',
-				choices: ['info', 'debug', 'warn'],
+				choices: [
+					'info',
+					'debug',
+					'warn',
+					'quiet',
+					'log_to_file',
+					'log_to_console',
+				],
 			})
 			.option('log-file', {
 				alias: 'lf',
@@ -149,14 +156,14 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 		const logger = new ConsoleColorLogger(logLevel, logFile);
 
 		if (logToConsole) {
-			logger.log('yellow', [
+			logger.log('info', [
 				`Process starting at: ${new Date().toLocaleDateString(
 					'en-EG',
 					options
 				)}`,
 			]);
-			logger.log('magenta', [
-				`Processing ${inputFolder}\nOutput Directory:${outputFolder}\nLog Level: ${logLevel}\nLog directory ${logFile}`,
+			logger.log('info', [
+				`Processing ${inputFolder}\nOutput Directory:${outputFolder}\nLog Level: ${logLevel}\nLog file ${logFile}`,
 			]);
 		}
 
@@ -191,14 +198,14 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 					const { directoryCount, falseCount, trueCount, notSupportedCount } =
 						result;
 					if (logToConsole) {
-						logger.log('magenta', [
+						logger.log('info', [
 							`Report:\n- Found ${directoryCount} ${
 								directoryCount === 1 ? 'directory' : 'directories'
 							}\n- Successfully converted: ${trueCount}\n- Failed to convert: ${falseCount}\n- Not Supported files: ${notSupportedCount}`,
 						]);
 						const endProcess = process.hrtime(startProcess);
 						const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
-						logger.log('yellow', [
+						logger.log('info', [
 							`Process ended at: ${new Date().toLocaleDateString(
 								'en-EG',
 								options
@@ -218,7 +225,8 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 				}
 			} catch (err) {
 				const error = err as Error;
-				logger.log('red', ['Error during conversion:', error.message]);
+				logger.log('warn_failed', ['Error during conversion']);
+				logger.log('debug', [error.message]);
 				return {
 					successful: false,
 					message: `Error during conversion: ${error.message}`,
@@ -253,13 +261,13 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 		const logger = new ConsoleColorLogger(logLevel, logFile);
 
 		if (logToConsole) {
-			logger.log('yellow', [
+			logger.log('info', [
 				`Process starting at: ${new Date().toLocaleDateString(
 					'en-EG',
 					options
 				)}`,
 			]);
-			logger.log('magenta', [
+			logger.log('info', [
 				`Processing ${inputFolder}\nOutput Directory:${outputFolder}\nLog Level: ${logLevel}\nLog directory ${logFile}`,
 			]);
 		}
@@ -295,14 +303,14 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 					const { directoryCount, falseCount, trueCount, notSupportedCount } =
 						result;
 					if (logToConsole) {
-						logger.log('magenta', [
+						logger.log('info', [
 							`Report:\n- Found ${directoryCount} ${
 								directoryCount === 1 ? 'directory' : 'directories'
 							}\n- Successfully converted: ${trueCount}\n- Failed to convert: ${falseCount}\n- Not Supported files: ${notSupportedCount}`,
 						]);
 						const endProcess = process.hrtime(startProcess);
 						const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
-						logger.log('yellow', [
+						logger.log('info', [
 							`Process ended at: ${new Date().toLocaleDateString(
 								'en-EG',
 								options
@@ -322,7 +330,8 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 				}
 			} catch (err) {
 				const error = err as Error;
-				logger.log('red', ['Error during conversion:', error.message]);
+				logger.log('warn_failed', ['Error during conversion:']);
+				logger.log('debug', [error.message]);
 				return {
 					successful: false,
 					message: `Error during conversion: ${error.message}`,
