@@ -76,6 +76,7 @@ WScript.Quit(0)  ' Exit with success code
 		state = false;
 		const endProcess = process.hrtime(startProcess);
 		const timeTaken = (endProcess[0] * 1e9 + endProcess[1]) / 1e9; // Convert to seconds
+		console.log(error);
 		logger.log('red', [`Creating PDF failed from: ${docxPath}`], timeTaken);
 	} finally {
 		await execPromise(`TASKKILL /im winword.exe /f`)

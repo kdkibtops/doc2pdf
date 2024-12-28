@@ -17,11 +17,44 @@ async function askForConfirmation(question: string): Promise<boolean> {
 		console.log('\x1b[31m');
 		rl.question(question, (response) => {
 			console.log('\x1b[0m');
-			rl.close();
+			// rl.close();
 			resolve(Boolean(response && response.toLowerCase() === 'y'));
 		});
 	});
 	return confirm;
+}
+async function getParams(
+	question: string,
+	onErrTerminate: boolean,
+	repeatQuestion: boolean = true
+): Promise<string | undefined> {
+	const rl = readline.createInterface({
+		input: process.stdin,
+		output: process.stdout,
+	});
+	const userResponse: string | undefined = await new Promise((resolve) => {
+		rl.question(question, (response) => {
+			if (!response || !existsSync(response)) {
+				console.log('Invalid folder path/path does not exist');
+				if (onErrTerminate) {
+					rl.close();
+					process.exit(1); // input folder does not exist
+				}
+				if (repeatQuestion) {
+					rl.close();
+					resolve(getParams(question, onErrTerminate, repeatQuestion));
+				} else {
+					rl.close();
+					resolve(undefined);
+				}
+			} else {
+				rl.close();
+				resolve(response);
+			}
+		});
+	});
+
+	return userResponse;
 }
 
 async function convert2PDF(
@@ -85,12 +118,25 @@ Do you want to continue and terminate all running word processes? (Y) or termina
 
 	inputFolder = inputFolder
 		? path.resolve(inputFolder)
-		: path.resolve(argv.input);
+		: argv.input
+		? path.resolve(argv.input)
+		: process.pkg
+		? path.resolve(
+				(await getParams(`Enter the input folder path:`, false).then(
+					(userResponse) => userResponse
+				)) as string
+		  )
+		: undefined;
+
+	if (!existsSync(inputFolder as string)) {
+		console.log('\x1b[31m%s\x1b[0m', 'Input folder does not exist');
+		process.exit(1); // input folder does not exist
+	}
 	outputFolder = outputFolder
 		? path.resolve(outputFolder)
 		: argv.output
 		? path.resolve(argv.output)
-		: path.join(path.resolve(inputFolder), 'exported');
+		: path.join(path.resolve(inputFolder as string), 'exported');
 
 	logLevel = logLevel || (argv['log-level'] as LogLevels);
 	logFile = logFile
