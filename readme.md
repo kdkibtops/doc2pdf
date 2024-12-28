@@ -137,20 +137,13 @@ You can find the GitHub repository for this project at: [convert-doc-to-pdf] (ht
 
 ## Changelog
 
-### v1.0.1
-
-- Minor fixes in the code and Readme.MD file.
-
-### v1.0.2
+### v1.0.1-v1.0.2
 
 - Updated dependencies to the latest versions.
 - Fixed issues with logging to console and file.
 - Improved error handling during the conversion process.
 - Fixed output directory structure, now all created filed are grouped into one directory without any subdirectories.
 - Fixed issue with created files extension, now original file extension is removed from the file name.
-
-### v1.0.3 (Still working on it)
-
 - VBS script will be created by the application if not exists, in case the app is running from pkg, the created temp_script.vbs will be removed once finished, however if app is running from node the created script will remain in the assets folder.
 - Managed log levels accordingly.
 - Quiet and no logging mode feature.

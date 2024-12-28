@@ -1,3 +1,5 @@
+import convert2PDF from '../src';
+
 // index.d.ts
 export type LogLevels =
 	| 'info'
@@ -29,3 +31,12 @@ export type ConversionResult =
 			trueCount: number;
 			notSupportedCount: number;
 	  };
+declare function convert2PDF(
+	prompt: boolean = false,
+	logToConsole: boolean = false,
+	inputFolder?: string,
+	outputFolder?: string,
+	logLevel: LogLevels = 'info',
+	logFile?: string
+): Promise<ConversionResult>;
+export default convert2PDF;
