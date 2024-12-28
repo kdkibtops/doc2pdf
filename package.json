@@ -1,6 +1,6 @@
 {
 	"name": "doc-to-pdf-converter",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Converts all .doc & .docx files in a specified folder and its subdirectories to pdf",
 	"main": "build/index.js",
 	"types": "Types/types.d.ts",
